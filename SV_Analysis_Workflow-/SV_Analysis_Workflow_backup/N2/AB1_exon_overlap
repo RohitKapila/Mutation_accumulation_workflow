@@ -1,0 +1,27 @@
+#Sort and Index VCF File
+
+bcftools sort AB_1EMS_denovo.vcf -o sorted_AB_1EMS_denovo.vcf
+bgzip sorted_AB_1EMS_denovo.vcf
+tabix -p vcf sorted_AB_1EMS_denovo.vcf.gz
+
+
+#Sort BED File
+sort -k1,1 -k2,2n AB1_exons.bed > sorted_AB1_exons.bed
+
+
+#Identify SVs in Exonic Regions
+bedtools intersect -a sorted_AB_1EMS_denovo.vcf.gz -b sorted_AB1_exons.bed -c > sv_exon_overlap_counts_AB_1EMS.vcf
+
+
+
+#Count Unique SVs Overlapping Exons
+grep -v "^#" sv_exon_overlap_counts_AB_1EMS.vcf | awk '$NF > 0' | wc -l
+
+
+#Identify Exons in SVs
+bedtools intersect -a sorted_AB1_exons.bed -b sorted_AB_1EMS_denovo.vcf.gz -c > exon_sv_overlap_counts_AB_1EMS.bed
+
+
+#Count Unique Exons Overlapping SVs
+awk '$NF > 0' exon_sv_overlap_counts_AB_1EMS.bed | wc -l
+
